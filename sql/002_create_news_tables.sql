@@ -14,10 +14,7 @@ CREATE TABLE IF NOT EXISTS news_sources(
 INSERT INTO news_sources(
     source_id , display_name, url,
     source_type,poll_interval_min)
-    VALUES(
-        'et_markets', 'ET Markets', 
-        'https://b2b.economictimes.indiatimes.com/rss/recentstories',
-        'rss',5),
+    VALUES
         (
             'ndtv_profit',' NDTV Profit',
             'https://feeds.feedburner.com/ndtvprofit-latest',
@@ -29,9 +26,14 @@ INSERT INTO news_sources(
             'rss',5
         ),
         (
-            'moneycontrol','MoneyControl',
-            'http://www.moneycontrol.com/rss/buzzingstocks.xml',
-            'rss',5
+            'bussiness_standards',' Bussiness Standard',
+            'https://www.business-standard.com/rss/latest.rss',
+            'rss', 5
+        ),
+        (
+            'et_money', 'ET Money',
+            'https://bfsi.economictimes.indiatimes.com/rss/topstories',
+            'rss', 5
         );
 --TABLE 2: raw_news 
 -- Stores all the raw news from all different sources. 
@@ -39,7 +41,7 @@ INSERT INTO news_sources(
 CREATE TABLE IF NOT EXISTS raw_news(
     id UUID PRIMARY KEY,
     url TEXT UNIQUE NOT NULL,
-    content_hash TEXT NOT NULL,
+    content_hash TEXT UNIQUE NOT NULL,
     source_id TEXT REFERENCES news_sources(source_id),
     source_group TEXT NOT NULL,
     headline TEXT NOT NULL,
@@ -48,7 +50,7 @@ CREATE TABLE IF NOT EXISTS raw_news(
     published_at TIMESTAMPTZ ,
     ingested_at TIMESTAMPTZ DEFAULT NOW(),
     ticker_tags TEXT[],
-    category TEXT, -- results|macro|policy|ipo|corporate|sector|market|other
+    category TEXT[], -- results|macro|policy|ipo|corporate|sector|market|other
     is_processed BOOLEAN DEFAULT FALSE,
     is_filing BOOLEAN DEFAULT FALSE
 );
@@ -90,7 +92,7 @@ ON nse_filings(filing_type, filing_date DESC);
 --One row per poll. Used to detect dead sources.
 CREATE TABLE poll_logs(
     id BIGSERIAL PRIMARY KEY,
-    source_id TEXT ,
+    source_id TEXT NOT NULL,
     polled_at TIMESTAMPTZ DEFAULT NOW(),
     items_fetched INT  DEFAULT 0,
     items_new INT DEFAULT 0,
