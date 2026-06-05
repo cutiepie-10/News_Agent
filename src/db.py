@@ -54,9 +54,25 @@ def upsert_raw_news(news:list[dict])->int :
         with conn.cursor() as curr:
             for n in news:
                 n['ticker_tags']= n.get('ticker_tags') or []
+                n['category'] = n.get('catgeory') or ['other']
                 curr.execute(sql, n)
                 inserted= curr.rowcount
         conn.commit()
 
     logger.info('Added %d new rows to raws_news DB', inserted)
     return inserted
+
+
+def log_poll(source_id:str, items_fetched:int,
+    items_new:int, success:bool, error:str):
+    """One row per source after every poll attempt"""
+    sql ="""
+    INSERT INTO poll_logs(
+    source_id, items_fetched,
+    items_new , success, error_message)
+    VALUES(%s, %s , %s, %s, %s);
+    """
+    with get_connection() as conn:
+        with conn.cursor() as curr:
+            curr.execute(sql,(source_id, items_fetched, items_new, success, error))
+        conn.commit()
