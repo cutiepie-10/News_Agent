@@ -54,14 +54,3 @@ def parse_raw_news(news: dict, source_id: str) -> dict:
         "ticker_tags": ticker_tags,
         "category": category
     }
-
-   
-url = "https://www.business-standard.com/rss/latest.rss"
-news = fetch_rss(url)
-for n in news:
-    
-    parsed_news = parse_raw_news(n,"")
-
-    if parsed_news is not None:
-        print(n)
-        print(parse_raw_news(n,""))

@@ -87,20 +87,21 @@ SYMBOL_MAP: dict[str, str] = {
     "grasim":         "GRASIM",
     "shriram":        "SHRIRAMFIN",
     "shriramfin":     "SHRIRAMFIN",
-
-    # ── Add more here as you observe what these analysts tweet about
+    'hinduja':        'HGS'
+    # ── Add more here as you observe
 }
-def extract_ticker_tags(text:str)->list[str]:
+
+
+def extract_ticker_tags(text: str) -> list[str]:
     """
     Extract the ticker tags from the news headline and summary.
     Returns the extracted ticker tags in a list.
     """
-    found: set[str] = set() 
+    found: set[str] = set()
     text_lower = text.lower()
-    for keyword,ticker in SYMBOL_MAP.items():
-        pattern= rf"\b{re.escape(keyword)}\b"
-        if re.search(pattern=pattern, string =text_lower):
+    for keyword, ticker in SYMBOL_MAP.items():
+        pattern = rf"\b{re.escape(keyword)}\b"
+        if re.search(pattern=pattern, string=text_lower):
             found.add(ticker)
-        
-    return sorted(found)
 
+    return sorted(found)

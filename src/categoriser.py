@@ -108,3 +108,85 @@ def categorise(text: str) -> list[str]:
     if len(buckets) == 0:
         buckets.add('other')
     return sorted(buckets)
+
+
+FILING_TYPE_MAP = {
+    'results': [
+        'financial results', 'audited financials',
+        'unaudited financials', 'quarterly results', 'earnings',
+        'limited review report', 'balance sheet', 'profit and loss'
+    ],
+    'agm': [
+        'agm notice', 'annual general meeting', 'egm notice',
+        'extraordinary general meeting', 'voting results',
+        'scrutinizer report', 'annual report', 'book closure agm'
+    ],
+    'board_meeting': [
+        'board meeting intimation', 'prior intimation', 'outcome of board meeting',
+        'meeting to be held', 'board to consider',
+        'postponement of board meeting'
+    ],
+    'buyback': [
+        'share buyback', 'buyback of equity',
+        'public announcement buyback',
+        'letter of offer buyback', 'capital reduction',
+        'tender offer'],
+    'dividend': [
+        'interim dividend', 'final dividend', 'special dividend',
+        'dividend declaration', 'dividend recommendation',
+        'record date dividend'
+    ],
+    'management_changes': [
+        'appointment of', 'resignation of', 'cessation of',
+        'change in kmp', 'change in directors', 'appointment of auditor',
+        'statutory auditor resignation', 'managing director', 'ceo change', 'cfo change'
+    ],
+    'fundraising': [
+        'allotment of shares', 'rights issue', 'bonus issue',
+        'preferential allotment', 'qip', 'qualified institutional placement',
+        'issue of ncd', 'non-convertible debentures', 'commercial paper',
+        'esop allotment', 'fund raising'
+    ],
+    'm_and_a': [
+        'acquisition', 'amalgamation', 'scheme of arrangement',
+        'demerger', 'joint venture', 'stake sale',
+        'slump sale', 'business transfer agreement', 'takeover'
+    ],
+    'credit_ratings': [
+        'credit rating', 'crisil', 'icra', 'care rating',
+        'india ratings', 'downgrade', 'upgrade', 'rating reaffirmation'
+    ],
+    'legal_and_regulatory': [
+        'penalty', 'sebi order', 'litigation', 'gst notice',
+        'tax demand', 'show cause notice', 'cbi',
+        'enforcement directorate', 'adjudication', 'sat order'
+    ],
+    'business_updates': [
+        'order win', 'contract awarded', 'mou signed',
+        'commercial production', 'plant shutdown', 'product launch',
+        'business update', 'capacity expansion'
+    ],
+    'insider_trading': ['sast regulation', 'pit regulation', 'insider trading',
+                        'promoter pledge', 'revocation of pledge', 'shareholding pattern',
+                        'encumbrance', 'continual disclosure'
+                        ],
+    'compliance_and_governance': [
+        'brsr report', 'business responsibility',
+        'corporate governance report', 'investor grievance', 'secretarial compliance',
+        'loss of share certificate', 'duplicate share certificate', 'newspaper publication'
+    ]
+}
+
+
+def categorise_filing(text: str) -> str:
+    filing_type: set[str] = set()
+    lower_text = text.lower()
+    for t, keywords in FILING_TYPE_MAP.items():
+        for keyword in keywords:
+            pattern = rf'\b{re.escape(keyword)}\b'
+            if re.search(pattern=pattern, string=lower_text):
+                filing_type.add(t)
+                break
+    if filing_type:
+        return filing_type.pop()
+    return ""
