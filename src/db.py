@@ -21,9 +21,9 @@ def fetch_active_sources()->list[dict]:
     with get_connection() as conn:
         with conn.cursor(cursor_factory= psycopg2.extras.RealDictCursor) as curr:
             curr.execute("""
-                SELECT source_id, display_name,source_type, poll_interval_min
+                SELECT source_id, display_name,source_type, poll_interval_min, url
                 FROM news_sources
-                WHERE is_active = TRUE
+                WHERE is_active
                 ORDER BY source_id;
             """)
             res= curr.fetchall()
@@ -42,19 +42,19 @@ def upsert_raw_news(news:list[dict])->int :
     sql ="""
         INSERT INTO raw_news(
         url,content_hash, source_id, source_group,
-        headline, body, summary, published_at,
-        ticker_tags, category, is_processed, is_filing)
+        headline, summary, published_at,
+        ticker_tags, category)
         VALUES(
         %(url)s, %(content_hash)s, %(source_id)s, %(source_group)s,
-        %(headline)s, %(body)s, %(summary)s,%(published_at)s,
-        %(ticker_tags)s,%(category)s, %(is_processed)s, %(is_filing)s)
+        %(headline)s, %(summary)s,%(published_at)s,
+        %(ticker_tags)s,%(category)s)
         ON CONFLICT DO NOTHING;
     """
     with get_connection() as conn:
         with conn.cursor() as curr:
             for n in news:
                 n['ticker_tags']= n.get('ticker_tags') or []
-                n['category'] = n.get('catgeory') or ['other']
+                n['category'] = n.get('category') or ['other']
                 curr.execute(sql, n)
                 inserted= curr.rowcount
         conn.commit()
@@ -64,7 +64,7 @@ def upsert_raw_news(news:list[dict])->int :
 
 
 def log_poll(source_id:str, items_fetched:int,
-    items_new:int, success:bool, error:str):
+    items_new:int, success:bool, error:str = ""):
     """One row per source after every poll attempt"""
     sql ="""
     INSERT INTO poll_logs(
@@ -76,3 +76,25 @@ def log_poll(source_id:str, items_fetched:int,
         with conn.cursor() as curr:
             curr.execute(sql,(source_id, items_fetched, items_new, success, error))
         conn.commit()
+
+def upsert_nse_filing(filings:list[dict])->int:
+    if not filings:
+        return 0
+    sql="""
+    INSERT INTO nse_filings(
+    filing_id, company_name, filing_type,
+    symbol, subject, description,
+    filing_date, pdf_url)
+    VALUES(
+    %(filing_id)s, %(company_name)s,%(filing_type)s,
+    %(symbol)s, %(subject)s, %(description)s,
+    %(filing_date)s, %(pdf_url)s)
+    ON CONFLICT DO NOTHING;
+    """
+    with get_connection() as conn:
+        with conn.cursor() as curr:
+            for filing in filings:
+                curr.execute(sql, filing)
+                inserted= curr.rowcount
+            logger.info('Added %d new rows to nse_filings DB',inserted)
+            return inserted
