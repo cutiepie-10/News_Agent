@@ -39,7 +39,7 @@ VALUES
 (
     'nse_announcements', 'NSE announcements',
     NULL,
-    'nse_api', 5
+    'nse_api', 15
 ),
 (
     'nse_calendar', 'NSE Events Calendar',
