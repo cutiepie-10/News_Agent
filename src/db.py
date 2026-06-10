@@ -98,3 +98,76 @@ def upsert_nse_filing(filings:list[dict])->int:
                 inserted= curr.rowcount
             logger.info('Added %d new rows to nse_filings DB',inserted)
             return inserted
+def get_volume(source_id,source_type)->int:
+    """
+    Gets the count of the ingested news in the last 24 hours by a source.
+    """
+    with get_connection() as conn:
+        with conn.cursor() as curr:
+            if(source_type =='rss'):
+                curr.execute(
+                    """
+                    SELECT COUNT(*) FROM raw_news
+                    WHERE source_id = %s
+                    ingested_at> NOW() - INTERVAL '24 hours';
+                    """,(source_id,)
+                )
+            else:
+                curr.execute(
+                """
+                SELECT COUNT(*) FROM nse_filings
+                WHERE filing_type = %s
+                ingested_at> NOW() - INTERVAL '24 hours';
+                """,(source_id,)
+            )
+            return curr.fetchone[0]
+def get_duplicate_count()->int:
+    with get_connection() as conn:
+        with conn.cursor() as curr:
+                curr.execute(
+                    """
+                    SELECT COUNT(*) FROM(
+                    SELECT url  FROM raw_news
+                    GROUP BY url HAVING COUNT(*)>1
+                    )t ;
+                    """
+                )
+                return curr.fetchone[0]
+
+def get_ticker_tag_pct(source_type):
+    with get_connection() as conn:
+        with conn.cursor() as curr:
+            if source_type== 'rss':
+                curr.execute(
+                    """
+                    SELECT ROUND(100.0
+                    * SUM(CASE WHEN array_length(ticker_tags,1)>0  THEN 1 ELSE 0 END)
+                    /NULLIF(COUNT(*),0 ),1) FROM raw_news
+                    WHERE ingested_at > NOW() - INTERVAL '24 hours';
+                    """
+                )
+                return curr.fetchone()[0]   or 0
+            else:
+                curr.execute(
+                    """
+                    SELECT ROUND(100.0
+                    * SUM(CASE WHEN array_length(ticker_tags,1)>0  THEN 1 ELSE 0 END)
+                    /NULLIF(COUNT(*),0 ),1) FROM nse_filings
+                    WHERE ingested_at > NOW() - INTERVAL '24 hours';
+                    """
+                )
+                return curr.fetchone()[0]   or 0
+def get_last_successfull_poll(source_id):
+    """
+    Gets the last successfull poll by a source.
+    """
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory = psycopg2.extras.DictCursor) as curr:
+            curr.execute(
+                """
+                SELECT MAX(polled_at) FROM poll_log
+                WHERE source_id = %s AND SUCCESS = TRUE;
+                """,
+                (source_id,)
+            )
+            return curr.fetchone[0]
