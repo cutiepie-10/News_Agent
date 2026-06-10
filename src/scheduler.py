@@ -19,6 +19,9 @@ _registered_sources: set[str] = set()
 
 
 def poll(source: dict):
+    """
+    Polls the results from source passed.
+    """
     try:
         if source['source_type'] == 'rss':
             news = fetch_rss(source['url'])
@@ -58,7 +61,9 @@ def poll(source: dict):
 
 
 def sync_sources(scheduler: BlockingScheduler):
-
+    """
+    Syncs all the active and removes the job of inactive sources.
+    """
     global _registered_sources
 
     active_sources = fetch_active_sources()
@@ -82,9 +87,9 @@ def sync_sources(scheduler: BlockingScheduler):
                 misfire_grace_time=20,
                 replace_existing=True
             )
-        logger.info('Scheduled a new job: Poll @%s every %d minutes',
+            logger.info('Scheduled a new job: Poll @%s every %d minutes',
                     source_id, interval)
-        _registered_sources.add(source_id)
+            _registered_sources.add(source_id)
     removed_sources = _registered_sources - active_set
     for source in removed_sources:
         job_id = f'poll_{source}'
@@ -94,6 +99,9 @@ def sync_sources(scheduler: BlockingScheduler):
 
 
 def start():
+    """
+    It starts the scheduler, adds the job to sync sources.
+    """
     scheduler = BlockingScheduler(timezone='Asia/Kolkata')
     sync_sources(scheduler=scheduler)
 
