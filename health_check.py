@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, timezone, timedelta
 from src.db import (
     fetch_active_sources,
@@ -67,3 +68,17 @@ def check_ticker_tagging():
     pct = get_ticker_tag_pct('nse')
     print(f"  {PASS if ok else FAIL}  {pct}% nse_filings ticker-tagged (need ≥30%)")
     return ok
+
+if __name__=='main':
+    results = [check_coverage(),
+    check_volume(),
+    check_no_duplicates(),
+    check_ticker_tagging()
+    ]
+    print(f'\n {'='*44}')
+    if all(results):
+        print("✅  ALL CHECKS PASSED — Week 3 complete")
+        sys.exit(0)
+    else:
+        print("❌  SOME CHECKS FAILED — fix before marking complete")
+        sys.exit(1)
