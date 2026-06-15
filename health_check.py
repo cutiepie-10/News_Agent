@@ -16,6 +16,7 @@ FAIL = '❌ FAIL'
 
 def check_volume():
     """Checks the volume of news from each active source."""
+    print("\n----Volume Check-----")
     sources = fetch_active_sources()
     all_ok = True
     for source in sources:
@@ -30,6 +31,7 @@ def check_volume():
 
 def check_coverage():
     """All active sources must have a successful poll in last 45 mins."""
+    print("\n----Coverage Check----")
     sources = fetch_active_sources()
     all_ok = True
     for source in sources:
@@ -42,7 +44,7 @@ def check_coverage():
             lag = "never" if not last else f"{int((NOW-last).total_seconds()/60)}m ago"
             print(f"  {FAIL}  @{source_id:<20} last poll {lag}")
             all_ok = False
-        return all_ok
+    return all_ok
 
 
 def check_no_duplicates():
@@ -63,21 +65,25 @@ def check_ticker_tagging():
     print("\n── Ticker Tagging Rate (last 24h) ──")
 
     pct = get_ticker_tag_pct('rss')
-    ok = pct >= 30
+    all_ok = ok = pct >= 30
     print(f"  {PASS if ok else FAIL}  {pct}% news ticker-tagged (need ≥30%)")
     pct = get_ticker_tag_pct('nse')
+    ok = pct >= 30
+    all_ok = all_ok and pct >= 30
     print(f"  {PASS if ok else FAIL}  {pct}% nse_filings ticker-tagged (need ≥30%)")
-    return ok
+    return all_ok
 
-if __name__=='main':
-    results = [check_coverage(),
-    check_volume(),
-    check_no_duplicates(),
-    check_ticker_tagging()
+
+if __name__ == '__main__':
+    results = [
+        check_coverage(),
+        check_volume(),
+        check_no_duplicates(),
+        check_ticker_tagging()
     ]
-    print(f'\n {'='*44}')
+    print(f'\n {"="*44}')
     if all(results):
-        print("✅  ALL CHECKS PASSED — Week 3 complete")
+        print("✅  ALL CHECKS PASSED — Week 2 complete")
         sys.exit(0)
     else:
         print("❌  SOME CHECKS FAILED — fix before marking complete")

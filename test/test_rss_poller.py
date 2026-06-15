@@ -7,4 +7,5 @@ def test_rss_parser():
     rss = fetch_rss(source_url=URL)
     assert len(rss)>=10
     for r in rss:
-        parse_raw_news(r,SOURCE_ID)
+        parsed= parse_raw_news(r,SOURCE_ID)
+        assert rss

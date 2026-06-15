@@ -23,7 +23,6 @@ def test_multiple_tickers():
     assert "RELIANCE" in result
 
 def test_deduplication():
-    # cashtag + keyword map both match NIFTY — should appear once
     result = extract_ticker_tags("Nifty at 22000. Nifty may open...")
     assert result.count("NIFTY") == 1
 
