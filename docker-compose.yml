@@ -24,17 +24,6 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-  pgadmin:
-    image: "dpage/pgadmin4:latest"
-    ports:
-      - 8080:80
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "jay.arora@email.com"
-      PGADMIN_DEFAULT_PASSWORD: "1234"
-    depends_on:
-      postgres: 
-        condition: service_healthy
-
 volumes:
   pgdata: null
  
