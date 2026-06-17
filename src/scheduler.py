@@ -40,13 +40,13 @@ def poll(source: dict):
             parsed = []
             if source['source_id'].find('announcements'):
                 announcements = fetch_nse_announcements()
-                parsed= [parse_nse_announcement(ann) for ann in announcements]
+                parsed = [parse_nse_announcement(ann) for ann in announcements]
             if source['source_id'].find('calendar'):
                 events = fetch_nse_events()
-                parsed=[parse_nse_event(event) for event in events]
+                parsed = [parse_nse_event(event) for event in events]
             if source['source_id'].find('board_meeeting'):
-                bms= fetch_nse_board_meetings()
-                parsed=[parse_nse_board_meeting(bm) for bm in bms]
+                bms = fetch_nse_board_meetings()
+                parsed = [parse_nse_board_meeting(bm) for bm in bms]
             parsed = [p for p in parsed if p]
             items_new = upsert_nse_filing(parsed)
             log_poll(source_id=source['source_id'], items_fetched=len(parsed),
@@ -88,7 +88,7 @@ def sync_sources(scheduler: BlockingScheduler):
                 replace_existing=True
             )
             logger.info('Scheduled a new job: Poll @%s every %d minutes',
-                    source_id, interval)
+                        source_id, interval)
             _registered_sources.add(source_id)
     removed_sources = _registered_sources - active_set
     for source in removed_sources:

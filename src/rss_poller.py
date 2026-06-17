@@ -1,6 +1,6 @@
 import logging
 import hashlib
-from datetime import datetime, timedelta,timezone
+from datetime import datetime, timedelta, timezone
 from time import mktime
 import requests
 import feedparser
@@ -10,7 +10,8 @@ from src.config import USER_AGENT
 
 logger = logging.getLogger(__name__)
 
-def fetch_rss(source_url: str)->list[dict]:
+
+def fetch_rss(source_url: str) -> list[dict]:
     """
     Fetches the .xml or .rss document for a particular source.
     Then parses the document and returns the list of dict of fresh news. 
@@ -23,7 +24,7 @@ def fetch_rss(source_url: str)->list[dict]:
         logger.error('Error occured fetching raws news from "%s" with status code of %d',
                      source_url, respo.status_code)
     parsed = feedparser.parse(respo.text)
-    logger.info('Parsed the rss file from "%s"',source_url)
+    logger.info('Parsed the rss file from "%s"', source_url)
     return parsed.entries
 
 
@@ -33,7 +34,8 @@ def parse_raw_news(news: dict, source_id: str) -> dict:
     It returns None for the news which are older than 12 hours.
     """
 
-    pub_time = datetime.fromtimestamp(mktime(news['published_parsed']),tz= timezone.utc)
+    pub_time = datetime.fromtimestamp(
+        mktime(news['published_parsed']), tz=timezone.utc)
     if (datetime.now(timezone.utc) > pub_time+timedelta(hours=12)):
         return None
     headline = news['title']
