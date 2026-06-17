@@ -56,7 +56,7 @@ VALUES
 -- Stores all the raw news from all different sources. 
 -- It should not contain any duplicate news
 
-CREATE EXTENSION pgcrypto; -- loads gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto; -- loads gen_random_uuid()
 
 CREATE TABLE IF NOT EXISTS raw_news (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
