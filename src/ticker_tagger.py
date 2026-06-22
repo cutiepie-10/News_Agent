@@ -19,8 +19,10 @@ SYMBOL_MAP: dict[str, str] = {
     "tcs":            "TCS",
     "infosys":        "INFY",
     "infy":           "INFY",
+    "hdfc":           "HDFCBANK",
     "hdfc bank":      "HDFCBANK",
     "hdfcbank":       "HDFCBANK",
+    "icici":          "ICICIBANK",
     "icici bank":     "ICICIBANK",
     "icicibank":      "ICICIBANK",
     "itc":            "ITC",
@@ -87,7 +89,7 @@ SYMBOL_MAP: dict[str, str] = {
     "grasim":         "GRASIM",
     "shriram":        "SHRIRAMFIN",
     "shriramfin":     "SHRIRAMFIN",
-    'hinduja':        'HGS'
+    'hinduja':        'HGS',
     # ── Add more here as you observe
 }
 
