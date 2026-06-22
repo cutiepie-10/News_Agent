@@ -144,6 +144,9 @@ def get_duplicate_count() -> int:
 
 
 def get_ticker_tag_pct(source_type):
+    """
+    Returns the ticker tagged percentage from raw_news
+    """
     with get_connection() as conn:
         with conn.cursor() as curr:
             if source_type == 'rss':
@@ -152,7 +155,7 @@ def get_ticker_tag_pct(source_type):
                     SELECT ROUND(100.0*
                     SUM((array_length(ticker_tags, 1) > 0)::int) 
                     / NULLIF(COUNT(*), 0), 1) FROM raw_news
-                    WHERE ingested_at > NOW() - INTERVAL '24 hours';
+                    WHERE ingested_at > NOW() - INTERVAL '24 hours' AND NOT category='{"other"}';
                     """
                 )
                 return curr.fetchone()[0] or 0
