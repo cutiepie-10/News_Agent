@@ -1,95 +1,70 @@
 import re
 
-CATEGORY_MAP: dict[str, str] = {
-    'quarterly result': 'results',
-    "q1 - q4 result": 'results',
-    "annual result": 'results',
-    "net profit": 'results',
-    'net loss': 'results',
-    'revenue jumps': 'results',
-    'revenue falls': 'results',
-    'revenue rises': 'results',
-    'ebitda': 'results',
-    'pat rises': 'results',
-    'pat falls': 'results',
-    'beats etimate': 'results',
-    'misses estimate': 'results',
-    'earnings': 'results',
-    'rbi': "macro",
-    'repo rate': "macro",
-    'inflation': "macro",
-    'cpi': "macro",
-    'wpi': "macro",
-    "gdp": "macro",
-    "iip": "macro",
-    "fed rate": "macro",
-    'crude oil': "macro",
-    "fii": "macro",
-    "dii": "macro",
-    "rupee": "macro",
-    "dollar index": "macro",
-    "current account": "macro",
-    "trade deficit": "macro",
-    'forex reserve': "macro",
-    'sebi': 'policy',
-    "budget": 'policy',
-    'government': 'policy',
-    'ministry': 'policy',
-    'regulation': 'policy',
-    "income tax": 'policy',
-    'gst': 'policy',
-    'import duty': 'policy',
-    "export ban": 'policy',
-    'customs duty': 'policy',
-    'pli scheme': 'policy',
-    'disinvestment': 'policy',
-    'ipo': 'ipo',
-    'initial public offering': 'ipo',
-    'listing': 'ipo',
-    'allotment': 'ipo',
-    'gmp': 'ipo',
-    'subscription status': 'ipo',
-    'anchor investor': 'ipo',
-    "board meeting": 'corporate',
-    'dividend': 'corporate',
-    'buyback': 'corporate',
-    'merger': 'corporate',
-    'acquisition': 'corporate',
-    'stake sale': 'corporate',
-    'open offer': 'corporate',
-    'delisting': 'corporate',
-    'rights issue': 'corporate',
-    'ceo': 'corporate',
-    'cfo': 'corporate',
-    'chairman': 'corporate',
-    'managing director':  'corporate',
-    'joint venture': 'corporate',
-    'it sector':    'sector',
-    'banking sector':    'sector',
-    'pharma sector':    'sector',
-    'auto sector':    'sector',
-    'fmcg':    'sector',
-    'metal sector':    'sector',
-    'realty':    'sector',
-    'infrastructure':    'sector',
-    'power sector':    'sector',
-    'psu bank':    'sector',
-    'private bank':    'sector',
-    'nbfc':    'sector',
-    'oil and gas':    'sector',
-    'telecom':    'sector',
-    'sensex':   'market',
-    'nifty':   'market',
-    'market rally':   'market',
-    'market crash':   'market',
-    'bull run':   'market',
-    'bear market':   'market',
-    'circuit breaker':   'market',
-    'upper circuit':   'market',
-    'lower circuit':   'market',
-    '52-week low':   'market',
-    '52-week high': 'market',
-    'market breadth':   'market'
+CATEGORY_MAP: dict[str, list[str]] = {
+    'results': [
+        'quarterly result', "q1 - q4 result", "annual result", "net profit", 'net loss',
+        'revenue jumps', 'revenue falls', 'revenue rises', 'ebitda', 'pat rises', 'pat falls',
+        'beats etimate', 'misses estimate', 'earnings', 'expects revenue', 'operational revenue',
+        'pat', 'pbt', 'operating profit', 'topline', 'bottomline', 'eps', 'earning per share',
+        'revenue growth', 'loss widens', 'turnaround', 'guidance', 'margins contract',
+        'beats street', 'sales surge', 'profit jumps', 'profit slips', 'margins expand',
+        'financial metrics', 'expects volume growth', 'growth forecast', 'outperformed'
+    ],
+    'macro': [
+        'rbi', 'repo rate', 'inflation', 'cpi', 'wpi', "gdp", "iip", "fed rate", 'crude oil',
+        "fii", "dii", "rupee", "dollar index", "current account", "trade deficit", 'forex reserve',
+        'monetary policy', 'mifor', 'sofr', 'basis points', 'bps', 'rate hike', 'rate cut',
+        'hawkish', 'dovish', 'bond yield', 'treasury yield', 'brent crude', 'forex inflow',
+        'fpi', 'foreign institutional investors', 'currency depreciation', 'rupee slides',
+        'fiscal deficit', 'g7 summit', 'g20 economic', 'macroeconomic indicators',
+        'rupee strengthens',  'export contraction',
+    ],
+    'policy': [
+        'sebi', "budget", 'government', 'ministry', 'regulation', "income tax",
+        'gst', 'import duty', "export ban", 'customs duty', 'pli scheme', 'disinvestment',
+        'trade deal', 'fta', 'export duty', 'g7',  'g20', 'tariffs', 'bilateral talks',
+        'free trade agreement', 'anti-dumping duty', 'export incentive',  'insolvency',
+        'ibc code', 'bankruptcy proceedings', 'cabinet approves', 'gazette notification',
+        'competition commission', 'regulatory filing', 'compliance hurdle', 'irdai',
+        'subsidy', 'fema regulation', 'nclt',  'cci probe', 'trai guidelines',
+    ],
+
+    'ipo': [
+        'ipo', 'initial public offering', 'listing', 'allotment', 'gmp',
+        'subscription status', 'anchor investor', 'qualified institutional buyers',
+        'grey market premium', 'listing gain', 'listing pop', 'red herring prospectus', 'drhp',
+        'rhp filing', 'public issue', 'book building', 'oversubscribed', 'unlisted shares',
+        'qib portion', 'retail bidding', 'ipo bound', 'market debut',  'offer price band'
+    ],
+    'corporate': [
+        "board meeting", 'dividend', 'buyback', 'merger', 'acquisition', 'stake sale', 'open offer',
+        'delisting', 'rights issue', 'ceo', 'cfo', 'chairman', 'managing director', 'joint venture',
+        'interim dividend', 'special dividend', 'ex-dividend', 'bonus shares', 'stock split',
+        'share consolidation', 'share repurchase', 'promoter buying', 'insider trading filing',
+        'block deal', 'bulk deal', 'promoter pledge', 'pledged shares revoked', 'takeover',
+        'spin-off', 'divestment', 'fundraising', 'ncds', 'preferential allotment', 'demerger',
+        'qip', 'executive transition', 'appoints ceo', 'cfo resigns', 'order win',
+        'secures contract', 'qualified institutional placement'
+    ],
+    'sector': [
+        'it sector', 'banking sector', 'pharma sector', 'auto sector', 'fmcg',
+        'metal sector', 'realty', 'infrastructure', 'power sector', 'psu bank', 'private bank',
+        'nbfc', 'oil and gas', 'telecom', 'consumer durables', 'green energy', 'ev segment',
+        'electric vehicles', 'renewable energy', 'specialty chemicals', 'defense manufacturing',
+        'real estate demand', 'auto dispatches', 'telecom subscriber data', 'microfinance',
+        'cement volumes', 'steel prices', 'agrochemicals', 'logistics sector', 'semiconductor',
+        'aviation sector', 'hospitality industry'
+    ],
+    'market': [
+        'sensex', 'nifty', 'market rally', 'market crash', 'bull run', 'bear market',
+        'circuit breaker', 'upper circuit', 'lower circuit', '52-week low', '52-week high',
+        'market breadth', 'nifty 50', 'bank nifty', 'midcap index', 'smallcap index', 
+        'profit booking', 'short covering', 'long unwinding', 'correction', 'oversold territory',
+        'overbought', 'market capitalization', 'm-cap', 'market turnover', 
+        'opening bell', 'closing trade', 'pre-market session', 'trade-to-trade', 'asm framework',
+        'volatility index', 'advances declines ratio', 'india vix'
+
+    ]
 }
 
 
@@ -100,11 +75,12 @@ def categorise(text: str) -> list[str]:
     """
     buckets: set[str] = set()
     lower_text = text.lower()
-    for keyword, category in CATEGORY_MAP.items():
-        pattern = rf'\b{re.escape(keyword)}\b'
-        if re.search(pattern=pattern, string=lower_text):
-            buckets.add(category)
-
+    for category, keywords in CATEGORY_MAP.items():
+        for keyword in keywords:
+            pattern = rf'\b{re.escape(keyword)}\b'
+            if re.search(pattern=pattern, string=lower_text):
+                buckets.add(category)
+                break
     if len(buckets) == 0:
         buckets.add('other')
     return sorted(buckets)
@@ -179,6 +155,9 @@ FILING_TYPE_MAP = {
 
 
 def categorise_filing(text: str) -> str:
+    """
+    Categorises the nse filings(rule based)
+    """
     filing_type: set[str] = set()
     lower_text = text.lower()
     for t, keywords in FILING_TYPE_MAP.items():
